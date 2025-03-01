@@ -1,0 +1,1 @@
+SELECT * FROM uretim_takip1.uretim_takip;

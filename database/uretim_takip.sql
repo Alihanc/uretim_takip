@@ -1,7 +1,8 @@
 CREATE table uretim_takip (
-id INT AUTO_INCREMENT PRIMARY KEY,
-parca_adi    VARCHAR(10),
-parca_malzemesi  VARCHAR(20),
-uretim_sekli     varchar(20),
-uretim_adedi INT 
+ID INT AUTO_INCREMENT PRIMARY KEY,
+ParcaAdi    VARCHAR(10),
+ParcaMalzemesi  VARCHAR(20),
+UretimSekli     varchar(20),
+UretimAdedi INT
+KayitTarihi time.time 
 );
