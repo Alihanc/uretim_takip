@@ -1,7 +1,6 @@
-package username_login
+package username
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,12 +14,12 @@ import (
 //var db *sql.DB
 
 // init fonksiyonu veritabanına bağlanır ve tabloyu oluşturur
-func init() {
+/*func init() {
 	var err error
 	dns := "root:kemal1938@tcp(127.0.0.1:3306)/uretim_takip1?parseTime=true"
 	db, err = sql.Open("mysql", dns)
 	if err != nil {
-		log.Fatalf("Veritabanına bağlanırken hata oluştu: %v", err)
+		log.Fatalf("Veritabanına bağlanırken hata oluştu:kullanıcı girişi %v", err)
 	}
 
 	// Bağlantıyı kontrol et
@@ -30,7 +29,7 @@ func init() {
 	}
 	fmt.Println("MySQL veritabanına başarıyla bağlanıldı.")
 
-}
+}*/
 
 type usernames struct {
 	ID        int       `json:"ID"`
@@ -40,10 +39,11 @@ type usernames struct {
 	CreatedAT time.Time `json:"CreatedAT"`
 }
 
-func username_signup(w http.ResponseWriter, r *http.Request) {
+func Username_signup(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Lütfen POST isteği gönderin", http.StatusMethodNotAllowed)
+
 		return
 	}
 
@@ -61,7 +61,7 @@ func username_signup(w http.ResponseWriter, r *http.Request) {
 	user.CreatedAT = time.Now()
 
 	//MYSQL'e ekleme sorgusu
-	query := `INSERT INTO username(Username,Password,Mail,CreatedAT) VALUES(?,?,?,?)`
+	query := `INSERT INTO usernames(Username,Password,Mail,CreatedAT) VALUES(?,?,?,?)`
 	result, err := db.Exec(query, user.Username, user.Password, user.Mail, user.CreatedAT)
 
 	if err != nil {

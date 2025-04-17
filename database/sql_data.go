@@ -34,12 +34,13 @@ func init() {
 
 // uretim_takip veritabanındaki parça kayıtlarını temsil eder
 type uretim_takip struct {
-	ID             int       `json:"ID"`
-	ParcaAdi       string    `json:"ParcaAdi"`
-	ParcaMalzemesi string    `json:"ParcaMalzemesi"`
-	UretimSekli    string    `json:"UretimSekli"`
-	UretimAdedi    int       `json:"UretimAdedi"`
-	KayitTarihi    time.Time `json:"KayitTarihi"`
+	ID               int       `json:"ID"`
+	ParcaAdi         string    `json:"ParcaAdi"`
+	ParcaMalzemesi   string    `json:"ParcaMalzemesi"`
+	UretimSekli      string    `json:"UretimSekli"`
+	UretimAdedi      int       `json:"UretimAdedi"`
+	KayitTarihi      time.Time `json:"KayitTarihi"`
+	GuncellemeTarihi time.Time `json:"update_time"`
 }
 
 // HomePage basit bir karşılama mesajı döndürür
@@ -125,6 +126,75 @@ func AddPiece(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": "Yeni kayıt başarıyla eklendi!",
+		"data":    p,
+	})
+}
+
+//kayıt silme
+
+func Delete_Piece(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Lütfen Delete isteği gönderin", http.StatusMethodNotAllowed)
+		return
+	}
+	//json formatındaki veriyi alma
+	var p uretim_takip
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		http.Error(w, "Geçersiz JSON formatı", http.StatusBadRequest)
+		log.Println("json perse hatası", err)
+		return
+	}
+	// parçayı veri tabanından silme
+	result, err := db.Exec("DELETE FROM uretim_takip WHERE ParcaAdi= ?", p.ParcaAdi)
+	if err != nil {
+		http.Error(w, "Parça silinirken hata oluştur", http.StatusInternalServerError)
+		log.Println("❌ SQL Hatası:", err)
+		return
+	}
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Kullanıcı bulunamadı", http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Println(w, "✅ Kullanıcı '%s' başarıyla silindi.\n", p.ParcaAdi)
+
+}
+func UpdatePiece(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Lütfen PUT İSteği gönderin", http.StatusMethodNotAllowed)
+		return
+	}
+	var p uretim_takip
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		http.Error(w, "Geçersiz veri", http.StatusBadRequest)
+		return
+	}
+	//update time
+	p.GuncellemeTarihi = time.Now()
+
+	//update query
+	query := `
+	UPDATE uretim_takip
+	SET ParcaAdi=?,ParcaMlazemesi=?, UretimSekli=?,UretimAdedi=?,GuncellemeTarihi=?
+	WHERE ID=?
+	`
+	result, err := db.Exec(query, p.ParcaAdi, p.ParcaMalzemesi, p.UretimSekli, p.UretimAdedi, p.GuncellemeTarihi, p.ID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Güncelleme sırasında hata oluştu:%v", err), http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Güncellenecek kayıt bulunamadı", http.StatusNotFound)
+		return
+	}
+	//send reply
+	w.Header().Set("Content-type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"massage": "Parça başarıyla güncellendi",
 		"data":    p,
 	})
 }

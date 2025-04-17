@@ -1,4 +1,4 @@
-package username_login
+package username
 
 import (
 	"database/sql"
@@ -17,10 +17,10 @@ var db *sql.DB
 // init fonksiyonu veri tabanına bağlanır
 func init() {
 	var err error
-	dns := "root:kemal1938@tcp(127.0.0.1:3306)/uretim_takip1?parseTime==true"
+	dns := "root:kemal1938@tcp(127.0.0.1:3306)/uretim_takip1?parseTime=true"
 	db, err = sql.Open("mysql", dns)
 	if err != nil {
-		log.Fatalf("Veri tabanına bağlanırken hata oluştu: %v", err)
+		log.Fatalf("Veri tabanına bağlanırken hata oluştu: kullanıcı girişi %v", err)
 
 	}
 	//Bağlantı kontrol
